@@ -36,6 +36,8 @@ contract Vault {
         }
         i_rebaseToken.burn(msg.sender, _amount);
         // redeem the underlying asset
+        // if the user doesn't have enough rebase token balance to burn, the burn will revert
+        // slither-disable-next-line arbitrary-send-eth
         (bool success,) = payable(msg.sender).call{value: _amount}("");
         if (!success) {
             revert Vault__RedeemFailed();
