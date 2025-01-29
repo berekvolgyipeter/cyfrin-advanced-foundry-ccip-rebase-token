@@ -13,8 +13,6 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  * @notice Each user will have their own interest rate that is the global interest rate at the time of depositing.
  */
 contract RebaseToken is ERC20, Ownable, AccessControl {
-    error RebaseToken__InterestRateCanOnlyDecrease(uint256 currentInterestRate, uint256 newInterestRate);
-
     uint256 private constant PRECISION_FACTOR = 1e18;
     bytes32 private constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE");
     mapping(address => uint256) private s_userInterestRate; // user's interest rate per second
@@ -22,6 +20,8 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     uint256 private s_interestRate = 5e10;
 
     event InterestRateSet(uint256 newInterestRate);
+
+    error RebaseToken__InterestRateCanOnlyDecrease(uint256 currentInterestRate, uint256 newInterestRate);
 
     constructor() Ownable(msg.sender) ERC20("RebaseToken", "RBT") {}
 

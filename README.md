@@ -17,6 +17,5 @@ This is a section of the [Cyfrin Foundry Solidity Course](https://github.com/Cyf
     and then later deposit a large amount to `wallet B` at a lower interest rate,
     and we trasfer our founds from `wallet B` to `wallet A`,
     we can have the high interest rate on all our funds which is not the intended behavior.
-    3. `mint and burn` role is granted to users, which makes the protocol somewhat centralized.
 
 ![alt text](img/protocol.png)
