@@ -16,8 +16,13 @@ contract RebaseTokenTest is Test {
 
     address public user = makeAddr("user");
     address public owner = makeAddr("owner");
-    uint256 public constant SEND_VALUE = 1e5;
+    uint256 public constant MIN_TIME = 1e3;
+    uint256 public constant MAX_TIME = type(uint96).max;
+    uint256 public constant MIN_SEND_VALUE = 1e5;
+    uint256 public constant MAX_SEND_VALUE = type(uint96).max;
+    uint256 public constant MAX_BALANCE = type(uint256).max;
     uint256 public constant INTEREST_RATE = 5e10;
+    uint256 public constant MAX_INTEREST_RATE = type(uint96).max;
 
     function setUp() public {
         vm.startPrank(owner);
@@ -33,13 +38,8 @@ contract RebaseTokenTest is Test {
         require(success, "Transfer to vault failed");
     }
 
-    function testInterestRate() public view {
-        uint256 interestRate = rebaseToken.getInterestRate();
-        assertEq(interestRate, INTEREST_RATE);
-    }
-
     function testDepositLinear(uint256 amount) public {
-        amount = bound(amount, 1e5, type(uint96).max);
+        amount = bound(amount, MIN_SEND_VALUE, MAX_SEND_VALUE);
 
         // 1. deposit
         vm.deal(user, amount);
@@ -70,7 +70,7 @@ contract RebaseTokenTest is Test {
     }
 
     function testRedeemStraightAway(uint256 amount) public {
-        amount = bound(amount, 1e5, type(uint96).max);
+        amount = bound(amount, MIN_SEND_VALUE, MAX_SEND_VALUE);
 
         // Deposit funds
         vm.deal(user, amount);
@@ -80,7 +80,7 @@ contract RebaseTokenTest is Test {
 
         // Redeem all funds
         vm.prank(user);
-        vault.redeem(type(uint256).max);
+        vault.redeem(MAX_BALANCE);
 
         uint256 balance = rebaseToken.balanceOf(user);
         console.log("User balance: %d", balance);
@@ -88,8 +88,8 @@ contract RebaseTokenTest is Test {
     }
 
     function testRedeemAfterTimeHasPassed(uint256 depositAmount, uint256 time) public {
-        time = bound(time, 1e3, type(uint96).max);
-        depositAmount = bound(depositAmount, 1e5, type(uint96).max);
+        time = bound(time, MIN_TIME, MAX_TIME);
+        depositAmount = bound(depositAmount, MIN_SEND_VALUE, MAX_SEND_VALUE);
 
         // Deposit funds
         vm.deal(user, depositAmount);
@@ -121,28 +121,28 @@ contract RebaseTokenTest is Test {
 
         vm.prank(user);
         vm.expectPartialRevert(IAccessControl.AccessControlUnauthorizedAccount.selector);
-        rebaseToken.mint(user, SEND_VALUE, interestRate);
+        rebaseToken.mint(user, MIN_SEND_VALUE, interestRate);
     }
 
     function testCannotCallBurn() public {
         vm.prank(user);
         vm.expectPartialRevert(IAccessControl.AccessControlUnauthorizedAccount.selector);
-        rebaseToken.burn(user, SEND_VALUE);
+        rebaseToken.burn(user, MIN_SEND_VALUE);
     }
 
     function testCannotWithdrawMoreThanBalance() public {
-        vm.deal(user, SEND_VALUE);
+        vm.deal(user, MIN_SEND_VALUE);
 
         vm.startPrank(user);
-        vault.deposit{value: SEND_VALUE}();
+        vault.deposit{value: MIN_SEND_VALUE}();
         vm.expectPartialRevert(IERC20Errors.ERC20InsufficientBalance.selector);
-        vault.redeem(SEND_VALUE + 1);
+        vault.redeem(MIN_SEND_VALUE + 1);
         vm.stopPrank();
     }
 
     function testTransfer(uint256 amount, uint256 amountToSend) public {
-        amount = bound(amount, 1e5 + 1e3, type(uint96).max);
-        amountToSend = bound(amountToSend, 1e5, amount - 1e3);
+        amount = bound(amount, MIN_SEND_VALUE + 1e3, MAX_SEND_VALUE);
+        amountToSend = bound(amountToSend, MIN_SEND_VALUE, amount - 1e3);
 
         // make a deposit by just the sender
         vm.deal(user, amount);
@@ -184,6 +184,11 @@ contract RebaseTokenTest is Test {
         assertEq(userInterestRate, INTEREST_RATE);
     }
 
+    function testInterestRate() public view {
+        uint256 interestRate = rebaseToken.getInterestRate();
+        assertEq(interestRate, INTEREST_RATE);
+    }
+
     function testSetInterestRate(uint256 newInterestRate) public {
         newInterestRate = bound(newInterestRate, 0, INTEREST_RATE - 1);
 
@@ -197,9 +202,9 @@ contract RebaseTokenTest is Test {
         assertEq(rebaseToken.getUserInterestRate(user), 0);
 
         // check that if someone deposits, this is their new interest rate
-        vm.deal(user, SEND_VALUE);
+        vm.deal(user, MIN_SEND_VALUE);
         vm.prank(user);
-        vault.deposit{value: SEND_VALUE}();
+        vault.deposit{value: MIN_SEND_VALUE}();
         uint256 userInterestRate = rebaseToken.getUserInterestRate(user);
         assertEq(userInterestRate, newInterestRate);
     }
@@ -212,7 +217,7 @@ contract RebaseTokenTest is Test {
 
     function testInterestRateCanOnlyDecrease(uint256 newInterestRate) public {
         uint256 initialInterestRate = rebaseToken.getInterestRate();
-        newInterestRate = bound(newInterestRate, initialInterestRate, type(uint96).max);
+        newInterestRate = bound(newInterestRate, initialInterestRate, MAX_INTEREST_RATE);
 
         vm.prank(owner);
         vm.expectPartialRevert(RebaseToken.RebaseToken__InterestRateCanOnlyDecrease.selector);
@@ -220,19 +225,19 @@ contract RebaseTokenTest is Test {
         assertEq(rebaseToken.getInterestRate(), initialInterestRate);
     }
 
-    function testGetPrincipleAmount(uint256 amount, uint256 time) public {
-        time = bound(time, 1e3, type(uint96).max);
-        amount = bound(amount, 1e5, type(uint96).max);
+    function testGetPrincipleBalance(uint256 amount, uint256 time) public {
+        time = bound(time, MIN_TIME, MAX_TIME);
+        amount = bound(amount, MIN_SEND_VALUE, MAX_SEND_VALUE);
 
         vm.deal(user, amount);
         vm.prank(user);
         vault.deposit{value: amount}();
-        uint256 principleAmount = rebaseToken.principalBalanceOf(user);
-        assertEq(principleAmount, amount);
+        uint256 principleBalance = rebaseToken.principalBalanceOf(user);
+        assertEq(principleBalance, amount);
 
         // check that the principle amount is the same after some time has passed
         vm.warp(block.timestamp + 1 days);
-        uint256 principleAmountAfterWarp = rebaseToken.principalBalanceOf(user);
-        assertEq(principleAmountAfterWarp, amount);
+        uint256 principleBalanceAfterWarp = rebaseToken.principalBalanceOf(user);
+        assertEq(principleBalanceAfterWarp, amount);
     }
 }
