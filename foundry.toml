@@ -13,8 +13,8 @@ remappings = [
 [dependencies]
 forge-std = { version = "1.9.5" }
 "@openzeppelin-contracts" = { version = "5.2.0" }
-smartcontractkit-ccip = { version = "2.17.0-ccip1.5.16", git = "https://github.com/smartcontractkit/ccip.git" }
-"chainlink-local" = { version = "0.2.3", git = "https://github.com/smartcontractkit/chainlink-local.git" }
+smartcontractkit-ccip = { version = "2.17.0-ccip1.5.16", git = "https://github.com/smartcontractkit/ccip.git", tag = "v2.17.0-ccip1.5.16" }
+"chainlink-local" = { version = "0.2.3", git = "https://github.com/smartcontractkit/chainlink-local.git", tag = "v0.2.3" }
 
 [soldeer]
 remappings_generate = false
