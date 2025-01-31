@@ -16,6 +16,10 @@ forge-std = { version = "1.9.5" }
 smartcontractkit-ccip = { version = "2.17.0-ccip1.5.16", git = "https://github.com/smartcontractkit/ccip.git", tag = "v2.17.0-ccip1.5.16" }
 "chainlink-local" = { version = "0.2.3", git = "https://github.com/smartcontractkit/chainlink-local.git", tag = "v0.2.3" }
 
+[rpc_endpoints]
+sepolia = "${RPC_URL_SEPOLIA}"
+arb-sepolia = "${RPC_URL_ARB_SEPOLIA}"
+
 [soldeer]
 remappings_generate = false
 remappings_regenerate = false

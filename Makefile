@@ -21,17 +21,7 @@ build :; forge build
 clean :; forge clean && rm -rf cache/
 
 # ---------- tests ----------
-TEST := forge test -vvv
-TEST_UNIT := $(TEST) --match-path "test/unit/*.t.sol"
-
-test :; $(TEST)
-test-unit :; $(TEST_UNIT)
-test-unit-fork-sepolia :; $(TEST_UNIT) --fork-url $(RPC_URL_SEPOLIA)
-test-unit-fork-mainnet :; $(TEST_UNIT) --fork-url $(RPC_URL_MAINNET)
-test-fuzz :; $(TEST) --match-path "test/fuzz/*.t.sol"
-test-invariant :; $(TEST) --match-path "test/invariant/*.t.sol"
-test-fork-sepolia :; $(TEST) --fork-url $(RPC_URL_SEPOLIA)
-test-fork-mainnet :; $(TEST) --fork-url $(RPC_URL_MAINNET)
+test :; forge test -vvv
 
 # ---------- coverage ----------
 coverage :; forge coverage --no-match-test invariant --no-match-coverage "^(test|script)/"

@@ -19,6 +19,9 @@ jobs:
 
     name: Foundry project
     runs-on: ubuntu-latest
+    env:
+      RPC_URL_SEPOLIA: ${{ secrets.RPC_URL_SEPOLIA }}
+      RPC_URL_ARB_SEPOLIA: ${{ secrets.RPC_URL_ARB_SEPOLIA }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -98,3 +98,15 @@ The same number of tokens are then unlocked from a vault on the destination chai
 These tokens are provided by liquidity providers.
 
 ![alt text](img/lock-unlock.png)
+
+## Tests
+
+The fork tests need RPC URLs, which can be created at [Alchemy](https://dashboard.alchemy.com).
+
+To be able to properly run the fork tests locally, you need to specify the RPC URLs in a _.env_ file.
+
+To make these tests run in github workflows, the RPC URLs are specified as env vars in
+[_.github/workflows/test.yml_](https://github.com/berekvolgyipeter/cyfrin-advanced-foundry-ccip-rebase-token/blob/main/.github/workflows/test.yml)
+referencing repository secrets, which have been added in the repository settings:
+
+![alt text](img/repo-secrets.png)
