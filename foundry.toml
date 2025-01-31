@@ -7,6 +7,8 @@ remappings = [
     "forge-std/=dependencies/forge-std-1.9.5/src/",
     "@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-5.2.0/",
     "@ccip/=dependencies/smartcontractkit-ccip-2.17.0-ccip1.5.16/contracts/src/v0.8/",
+    # chainlink-local needs this remapping
+    "@chainlink/contracts-ccip/=dependencies/smartcontractkit-ccip-2.17.0-ccip1.5.16/contracts/",
     "@chainlink-local/=dependencies/chainlink-local-0.2.3/",
 ]
 
