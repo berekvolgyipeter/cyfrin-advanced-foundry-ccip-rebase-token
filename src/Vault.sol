@@ -28,7 +28,7 @@ contract Vault {
     }
 
     /**
-     * @dev redeem rebase tokens for the underlying asset
+     * @dev redeem underlying asset for the burned rebase tokens
      */
     function redeem(uint256 _amount) external {
         if (_amount == type(uint256).max) {
