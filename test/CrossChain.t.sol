@@ -176,6 +176,8 @@ contract CrossChainTest is Test {
         vm.stopPrank();
     }
 
+    // -------------------- TEST HELPER FUNCTIONS -------------------- //
+
     /// @notice See official chainlink guide to transfer tokens cross-chain:
     /// https://docs.chain.link/ccip/tutorials/transfer-tokens-from-contract
     function bridgeTokens(
@@ -189,9 +191,9 @@ contract CrossChainTest is Test {
     )
         public
     {
-        // -----------------------------------------------------
-        // -------------------- LOCAL CHAIN --------------------
-        // -----------------------------------------------------
+        // ----------------------------------------------------- //
+        // -------------------- LOCAL CHAIN -------------------- //
+        // ----------------------------------------------------- //
         vm.selectFork(localFork);
 
         // Create the message to send tokens cross-chain
@@ -230,9 +232,9 @@ contract CrossChainTest is Test {
 
         uint256 localUserInterestRate = localToken.getUserInterestRate(alice);
 
-        // ------------------------------------------------------
-        // -------------------- REMOTE CHAIN --------------------
-        // ------------------------------------------------------
+        // ------------------------------------------------------ //
+        // -------------------- REMOTE CHAIN -------------------- //
+        // ------------------------------------------------------ //
         vm.selectFork(remoteFork);
         // Pretend it takes 15 minutes to bridge the tokens
         vm.warp(block.timestamp + 15 minutes);
@@ -248,5 +250,56 @@ contract CrossChainTest is Test {
         // Check interest rate after bridge
         uint256 remoteUserInterestRate = remoteToken.getUserInterestRate(alice);
         assertEq(localUserInterestRate, remoteUserInterestRate);
+    }
+
+    function bridgeAndBridgeBackTokens(uint256 amount) public {
+        vm.selectFork(sepoliaFork);
+        vm.deal(alice, SEND_VALUE);
+
+        // Deposit to the vault and receive tokens
+        vm.prank(alice);
+        Vault(payable(address(vault))).deposit{value: SEND_VALUE}();
+
+        assertEq(IRebaseToken(address(sepoliaToken)).balanceOf(alice), SEND_VALUE);
+
+        // bridge tokens to the destination chain
+        bridgeTokens(
+            amount,
+            sepoliaFork,
+            arbSepoliaFork,
+            sepoliaNetworkDetails,
+            arbSepoliaNetworkDetails,
+            sepoliaToken,
+            arbSepoliaToken
+        );
+
+        // bridge back tokens to the source chain after 1 hour
+        vm.selectFork(arbSepoliaFork);
+        vm.warp(block.timestamp + 1 hours);
+
+        uint256 destBalance = IRebaseToken(address(arbSepoliaToken)).balanceOf(alice);
+        uint256 destPrincipalBalance = IRebaseToken(address(arbSepoliaToken)).principalBalanceOf(alice);
+        assertEq(destPrincipalBalance, amount);
+        assertGt(destBalance, amount); // interest rate has been accumulated during the 1 hour
+
+        bridgeTokens(
+            destBalance,
+            arbSepoliaFork,
+            sepoliaFork,
+            arbSepoliaNetworkDetails,
+            sepoliaNetworkDetails,
+            arbSepoliaToken,
+            sepoliaToken
+        );
+    }
+
+    // -------------------- TEST FUNCTIONS -------------------- //
+
+    function testBridgeAndBridgeBackTokens() public {
+        bridgeAndBridgeBackTokens(SEND_VALUE / 2);
+    }
+
+    function testBridgeAndBridgeBackAllTokens() public {
+        bridgeAndBridgeBackTokens(SEND_VALUE);
     }
 }
