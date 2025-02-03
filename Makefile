@@ -44,4 +44,6 @@ check-etherscan-api:
 NETWORK_ARGS_ANVIL := --rpc-url $(RPC_URL_ANVIL) --private-key $(PRIVATE_KEY_ANVIL_0) --broadcast
 NETWORK_ARGS_SEPOLIA := --rpc-url $(RPC_URL_SEPOLIA) --account $(ACCOUNT_DEV) --sender $(ADDRESS_DEV) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 
+bridge-to-zk-sync :; chmod +x ./bridgeToZkSync.sh && ./bridgeToZkSync.sh
+
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
