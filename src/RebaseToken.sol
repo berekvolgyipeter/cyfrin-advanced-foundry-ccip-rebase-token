@@ -154,8 +154,8 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         uint256 currentBalance = balanceOf(_user);
         uint256 balanceIncrease = currentBalance - principalBalance;
 
-        _mint(_user, balanceIncrease);
         s_userLastUpdatedTimestamp[_user] = block.timestamp;
+        _mint(_user, balanceIncrease);
     }
 
     function getInterestRate() external view returns (uint256) {

@@ -10,9 +10,9 @@ import {IRebaseToken} from "src/interfaces/IRebaseToken.sol";
 contract RebaseTokenPool is TokenPool {
     constructor(
         IERC20 token,
-        address[] memory allowlist,
-        address rmnProxy,
-        address router
+        address[] memory allowlist, // addresses authorized to initiate cross-chain operations (0 = everyone)
+        address rmnProxy, // Risk Management Network proxy address
+        address router // CCIP router address
     )
         TokenPool(token, allowlist, rmnProxy, router)
     {}
